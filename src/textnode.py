@@ -11,17 +11,13 @@ class TextType(Enum):
 
 
 class TextNode():
-    def __init__(self, text, text_type, url):
+    def __init__(self, text, text_type, url=None):
         self.text = text
         self.text_type = text_type
-        if len(url) == 0:
-            return None
-        if type(url) == str:
-            self.url = url
-
+        self.url = url
     def __eq__(self, object2):
-        return (
-            self.text == object2.text and self.text_type == object2.text_type and self.ulr == object2.url
+       return (
+            self.text == object2.text and self.text_type == object2.text_type and self.url == object2.url
             )
 
     def __repr__(self):
