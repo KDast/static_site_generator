@@ -1,12 +1,17 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 
 
 props_test1 = {"href":"https://www.google.com"}
-children1 = ["hey there", "I should not be accepted"]
+children1 = [
+        LeafNode("b", "Bold text"),
+        LeafNode(None, "Normal text"),
+        LeafNode("i", "italic text"),
+        LeafNode(None, "Normal text"),
+    ],
 
 class test_LeafNode(unittest.TestCase):
     def test_eq(self): #value, tag, props= None
@@ -34,6 +39,14 @@ class test_LeafNode(unittest.TestCase):
         with self.assertRaises(ValueError):
             leafnode1.to_html()
             
+
+#Parent Node test------
+class test_ParentNode(unittest.TestCase):
+    def test_eq(self): #normal case
+        parentnode1 = ParentNode("p",children1,)
+        answer = "<p><b>Bold text</b>Normal text<i>italic text</i>Normal text</p>"
+        self.assertEqual(parentnode1.to_html(), answer)
+
 
 
 
