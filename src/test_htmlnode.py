@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 children = []
 props_test = {"href":"https://www.google.com", "target": "_blank"}
 
@@ -20,10 +20,6 @@ class test_HTMlNode(unittest.TestCase):
         props1 = HTMLNode("h1", "This is value",None, props_test)
         answer = ' href "https://www.google.com" target "_blank"'
         self.assertNotEqual(props1.props_to_html(), answer)
-
-
-
-
 
 
 if __name__ == "__main__":
