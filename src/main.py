@@ -15,8 +15,8 @@ def main():
     ]
     parentnode1 = ParentNode("p", children1, props_test1)
    
-    print(parentnode1.to_html())
-
+    text_node_to_convert = TextNode("HEllo",TextType.BOLD, None)
+    print(text_node_to_convert.text_node_to_html_node())
 
 
 

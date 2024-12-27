@@ -22,7 +22,13 @@ class HTMLNode():
 class LeafNode(HTMLNode):
     def __init__(self, tag=None, value=None, props=None):
         super().__init__(tag, value=value, children = None, props=props)
-    
+
+    def __eq__(self, object2):
+       if not isinstance(object2, LeafNode):
+           raise Exception("class is not LeafNode")
+       return (
+            self.value == object2.value and self.tag == object2.tag and self.props == object2.props
+            )
 
     def to_html(self):
         if not self.value:
@@ -51,3 +57,5 @@ class ParentNode(HTMLNode):
                         raise TypeError("Unsupported node type in children")
                     a += child.to_html()
             return (f"<{self.tag}{self.props_to_html()}>{a}</{self.tag}>")
+
+
