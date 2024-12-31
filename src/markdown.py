@@ -102,7 +102,7 @@ def split_nodes_link(old_nodes):
 
 
 
-input = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+
 
 def text_to_textnodes(text):
     nodes = [TextNode(text, TextType.NORMAL)]
@@ -118,14 +118,6 @@ def text_to_textnodes(text):
     return nodes
 
 
-input= ("""# This is a heading
-
-This is a paragraph of text. It has some **bold** and *italic* words inside of it.
-
-* This is the first list item in a list block
-* This is a list item
-* This is another list item""")
-
 def markdown_to_blocks(markdown):
     new_list = []
     string_list = markdown.split("\n\n")
@@ -137,7 +129,7 @@ def markdown_to_blocks(markdown):
         new_list.append(strings)
     return new_list
 
-block = "#### This is a heading"
+
 def block_to_block(block):
     if block.startswith("# ") or block.startswith("## ") or block.startswith("### ") or block.startswith("#### ") or block.startswith("##### ") or block.startswith("###### "):
         return "heading"
@@ -152,15 +144,17 @@ def block_to_block(block):
             return "line"
         else:
             raise Exception("missing '>' in this block ")
-    if block.startswith("* ") or block.startswith("- "):
-        is_unordered_list = True
+    if block.startswith("* "): 
         for line in block.split("\n"):
-            if not (line.startswith("* ") or line.startswith("- ")):
-                is_unordered_list = False
-        if is_unordered_list:
-            return "unordered list"
-        else:
-            raise Exception("missing '- ' or '* ' in this block ")
+            if not line.startswith("* "):
+                return "paragraph"
+        return "unordered list"
+    if block.startswith("- "):
+        for line in block.split("\n"):
+            if not line.startswith("- "):
+                return "paragraph"
+        return "unordered list"
+
     if block.startswith("1. "):
         ordered_list = True
         increment = 1
@@ -168,30 +162,109 @@ def block_to_block(block):
             if line.startswith(f"{increment}. "):
                 increment += 1
             else:
-                ordered_list = False
+                return "paragraph"
         if ordered_list:
             return "ordered list"
         else:
             raise Exception("missing numbers or not ordered properly")
     else:
-        return "normal paragraph"
-    
-def markdown_to_html_node(markdown):
+        return "paragraph"
 
 
+def markdown_node_heading(block):
+    count = 0
+    for letters in block[0:6]:
+        if letters == "#":
+            count += 1
+        if letters == " ":
+            break
+    value = block[count+1:]
+    tag = f"h{count}"
+    return (tag, value)
 
 
+def value_to_node(value): #takes a text (value) and returns it as a list of leafnode. the elements can be converted to html with to_html method
+    text_node_value = text_to_textnodes(value) 
+    leaf_list = []
+    for text in text_node_value:
+        leafnode = text_node_to_html_node(text)
+        leaf_list.append(leafnode)
+    return leaf_list # leaf_list is the children in the parent node
 
+            
+def markdown_to_html_node(markdown): #Parent HTMLNODE -> childrens = block_list, tag <div>, no props, each block should be a leafnode
+# every block_type needs its associated tag and value.
+    block_list = markdown_to_blocks(markdown)
+    children_block_list = []
+    #make one function that returns the node for each type
 
-
-
+    for blocks in block_list:
+        block_type = block_to_block(blocks)
+        if block_type == "heading": #n is the number of #
+            tag, value = markdown_node_heading(blocks)[0], markdown_node_heading(blocks)[1]
+            children = value_to_node(value)
+            block_node = ParentNode(tag, children,)
+            children_block_list.append(block_node) 
         
+        if block_type == "code": # should be nested inside <pre>
+            tag = "code"
+            value = blocks[3:-3]
+            children = value_to_node(value)
+            pre_nested = ParentNode(tag, children,)
+            list_prenested = []
+            list_prenested.append(pre_nested)
+            block_node = ParentNode("pre", list_prenested) #Pre nested must be converted into a list otherwise to_html cannot iterate in block_node.to_html()
+            children_block_list.append(block_node)
+
+        if block_type == "line":
+            tag = "blockquote"
+            value = blocks[1:]
+            children = value_to_node(value)
+            block_node = ParentNode(tag, children,)
+            children_block_list.append(block_node)
+
+
+        if block_type == "unordered list": #will have children every line of the list should be considred as a children of the block
+            list_element = blocks.split("\n")
+            list_children = []
+            for ele in list_element:
+                value = ele[2:]
+                tag = "li"
+                children = value_to_node(value)
+                list_children.append(ParentNode(tag, children,))
+            block_node = ParentNode("ul", list_children,)
+            children_block_list.append(block_node)
             
 
-                
+        if block_type == "ordered list": # will have children
+            list_element = blocks.split("\n")
+            list_children = []
+            for ele in list_element:
+                value = ele[3:]
+                tag = "li"
+                children = value_to_node(value)
+                list_children.append(ParentNode(tag, children,))
+            block_node = ParentNode("ol", list_children,)
+            children_block_list.append(block_node)
+
+        if block_type == "paragraph":
+            tag = "p"
+            value = blocks
+            children = value_to_node(value)
+            block_node = ParentNode(tag, children,)
+            children_block_list.append(block_node)
+    return ParentNode("div", children_block_list,)  
     
         
-        
+
+markdown = """# This is a heading
+
+    This is a paragraph of text. It has some **bold** and *italic* words inside of it.
+
+* This is the first list item in a list block
+* This is a list item
+* This is another list item"""
+print(markdown_to_html_node(markdown).to_html())       
 
 
 

@@ -245,7 +245,33 @@ This is the same paragraph on a new line
         md = """ $$ GUCCI $$
         """
         blocks = block_to_block(md)
-        self.assertEqual(blocks, "normal paragraph")
+        self.assertEqual(blocks, "paragraph")
+
+
+
+
+
+
+    def test_markdown_blocks_to_html(self):
+        markdown = """# This is a heading
+
+    This is a paragraph of text. It has some **bold** and *italic* words inside of it.
+
+* This is the first list item in a list block
+* This is a list item
+* This is another list item"""
+        node = markdown_to_html_node(markdown)
+        html = node.to_html()
+        
+        html_string = (
+    "<div><h1>This is a heading</h1><p>This is a paragraph of text. "
+    "It has some <b>bold</b> and <i>italic</i> words inside of it.</p>"
+    "<ul><li>This is the first list item in a list block</li>"
+    "<li>This is a list item</li>"
+    "<li>This is another list item</li></ul></div>"
+)
+        self.assertEqual(html, html_string)
+        
 
 if __name__ == "__main__":
     unittest.main()
