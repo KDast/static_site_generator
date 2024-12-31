@@ -117,12 +117,66 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
     return nodes
 
-print(text_to_textnodes(input))
+
+input= ("""# This is a heading
+
+This is a paragraph of text. It has some **bold** and *italic* words inside of it.
+
+* This is the first list item in a list block
+* This is a list item
+* This is another list item""")
+
+def markdown_to_blocks(markdown):
+    new_list = []
+    string_list = markdown.split("\n\n")
+    for string in string_list:
+        strings = string.strip()
+        if strings == "":
+            continue
+        
+        new_list.append(strings)
+    return new_list
+
+block = "#### This is a heading"
+def block_to_block(block):
+    if block.startswith("# ") or block.startswith("## ") or block.startswith("### ") or block.startswith("#### ") or block.startswith("##### ") or block.startswith("###### "):
+        return "heading"
+    if block.startswith("```") and block.endswith("```"):
+        return "code"
+    if block.startswith(">"):
+        is_line = True
+        for line in block.split("\n"):
+            if not line.startswith(">"):
+                is_line = False
+        if is_line:
+            return "line"
+        else:
+            raise Exception("missing '>' in this block ")
+    if block.startswith("* ") or block.startswith("- "):
+        is_unordered_list = True
+        for line in block.split("\n"):
+            if not (line.startswith("* ") or line.startswith("- ")):
+                is_unordered_list = False
+        if is_unordered_list:
+            return "unordered list"
+        else:
+            raise Exception("missing '- ' or '* ' in this block ")
+    if block.startswith("1. "):
+        ordered_list = True
+        increment = 1
+        for line in block.split("\n"):
+            if line.startswith(f"{increment}. "):
+                increment += 1
+            else:
+                ordered_list = False
+        if ordered_list:
+            return "ordered list"
+        else:
+            raise Exception("missing numbers or not ordered properly")
+    else:
+        return "normal paragraph"
     
-
-
-
-
+def markdown_to_html_node(markdown):
 
 
 

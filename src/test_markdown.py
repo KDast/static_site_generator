@@ -1,7 +1,5 @@
 import unittest
-from markdown import (
-    split_nodes_delimiter, extract_markdown_links, extract_markdown_images, split_nodes_image, split_nodes_link, text_to_textnodes
-)
+from markdown import *
 
 from textnode import TextNode, TextType
 
@@ -171,9 +169,83 @@ class TestInlineMarkdown(unittest.TestCase):
         )
 
 
+class TestMarkdownToHTML(unittest.TestCase):
+    def test_markdown_to_blocks(self):
+        md = """
+This is **bolded** paragraph
+
+This is another paragraph with *italic* text and `code` here
+This is the same paragraph on a new line
+
+* This is a list
+* with items
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with *italic* text and `code` here\nThis is the same paragraph on a new line",
+                "* This is a list\n* with items",
+            ],
+        )
+
+    def test_markdown_to_blocks_newlines(self):
+        md = """
+This is **bolded** paragraph
 
 
 
+
+This is another paragraph with *italic* text and `code` here
+This is the same paragraph on a new line
+
+* This is a list
+* with items
+"""
+
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with *italic* text and `code` here\nThis is the same paragraph on a new line",
+                "* This is a list\n* with items",
+            ],
+        )
+#------------------------------ block to block function-------------------------------------------------------------------
+    def test_block_heading(self):
+        md = "### This is a heading"
+
+        blocks = block_to_block(md)
+        self.assertEqual(blocks, "heading")
+         
+
+    def test_block_code(self):
+        md = "``` This is some code men```"
+        blocks = block_to_block(md)
+        self.assertEqual(blocks, "code")
+           
+    def test_block_line(self):
+        md = """> This is a line\n> HEY\n> OUH"""
+        blocks = block_to_block(md)
+        self.assertEqual(blocks, "line")
+
+    def test_block_unorderedlist(self):
+        md = """- This is a line\n- HEY\n- OUH"""
+        blocks = block_to_block(md)
+        self.assertEqual(blocks, "unordered list")
+
+    def test_block_orderedlist(self):
+        md = """1. This is a line\n2. HEY\n3. OUH"""
+        blocks = block_to_block(md)
+        self.assertEqual(blocks, "ordered list")
+
+    def test_block_orderedlist(self):
+        md = """ $$ GUCCI $$
+        """
+        blocks = block_to_block(md)
+        self.assertEqual(blocks, "normal paragraph")
 
 if __name__ == "__main__":
     unittest.main()
